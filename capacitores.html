@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capacitores y Dieléctricos – Unidad 2</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:#f4f6fa;color:#1d2433}
+header{background:#1f2a44;color:#fff;padding:14px 20px}
+header h1{margin:0;font-size:1.25rem}
+main{max-width:1200px;margin:auto;padding:16px}
+.card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 4px #0002}
+h2{font-size:1.05rem;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:330px 1fr;gap:20px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{cursor:pointer;border:0;border-radius:6px;padding:8px 14px;background:#e4e8f1;color:#1d2433;font-size:.95rem}
+.tabs button.on{background:#2f5bea;color:#fff}
+.panel{display:none}.panel.on{display:block}
+label{display:block;font-size:.8rem;color:#55607a;margin:10px 0 3px}
+label b{color:#1d2433}
+input[type=range]{width:100%}
+input[type=number],select{width:100%;padding:6px;border:1px solid #c5ccd8;border-radius:6px;font-size:.92rem}
+.row{display:grid;grid-template-columns:2fr 1fr;gap:8px}
+.res{margin-top:14px;background:#eef2fb;border-radius:8px;padding:10px;font-family:Consolas,monospace;font-size:.9rem;line-height:1.7;white-space:pre-wrap}
+.warn{margin-top:8px;color:#b9381f;font-size:.85rem;font-weight:600}
+.note{font-size:.8rem;color:#55607a;line-height:1.5}
+canvas{width:100%;max-width:640px;height:auto;background:#fff;border:1px solid #d5dbe6;border-radius:8px;display:block;margin-top:10px}
+</style>
+</head>
+<body>
+<header><h1>🔋 Capacitores y Dieléctricos</h1></header>
+<main>
+  <div class="tabs">
+    <button class="on" onclick="tab(0,this)">Simulador de capacitores</button>
+    <button onclick="tab(1,this)">Calculadora de energía</button>
+  </div>
+
+  <!-- ============ MÓDULO 1 ============ -->
+  <section class="panel on card">
+    <div class="grid">
+      <div>
+        <h2>Capacitor de placas paralelas</h2>
+        <label>Área de las placas A: <b id="vA"></b></label>
+        <input id="A" type="range" min="10" max="500" step="5" value="100">
+        <label>Distancia entre placas d: <b id="vd"></b></label>
+        <input id="d" type="range" min="0.1" max="10" step="0.1" value="2">
+        <label>Voltaje aplicado V: <b id="vV"></b></label>
+        <input id="V" type="range" min="1" max="200" step="1" value="12">
+        <label>Dieléctrico</label>
+        <select id="diel"></select>
+        <div id="kcBox" style="display:none">
+          <label>Constante dieléctrica κ</label>
+          <input id="kc" type="number" value="4" min="1" step="0.1">
+        </div>
+        <div class="res" id="out1"></div>
+        <div id="warn" class="warn"></div>
+        <p class="note">C = κ·ε₀·A / d &nbsp;·&nbsp; Q = C·V &nbsp;·&nbsp; E = V / d<br>ε₀ = 8,854×10⁻¹² F/m. Modelo ideal: sin efectos de borde.</p>
+      </div>
+      <div>
+        <canvas id="cv1" width="640" height="360"></canvas>
+        <div class="row">
+          <div><label>Gráfica de C en función de:</label>
+            <select id="xvar"><option value="d">Distancia d</option><option value="A">Área A</option></select></div>
+        </div>
+        <canvas id="cv2" width="640" height="260"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MÓDULO 2 ============ -->
+  <section class="panel card">
+    <div class="grid">
+      <div>
+        <h2>Energía almacenada</h2>
+        <label>Datos que conozco</label>
+        <select id="mode">
+          <option value="CV">Capacitancia C y voltaje V</option>
+          <option value="QC">Carga Q y capacitancia C</option>
+          <option value="QV">Carga Q y voltaje V</option>
+        </select>
+        <div class="row" id="gC">
+          <div><label>Capacitancia C</label><input id="inC" type="number" value="100" step="any"></div>
+          <div><label>Unidad</label><select id="uC"><option value="1e-12">pF</option><option value="1e-9">nF</option><option value="1e-6" selected>μF</option><option value="1e-3">mF</option><option value="1">F</option></select></div>
+        </div>
+        <div class="row" id="gV">
+          <div><label>Voltaje V</label><input id="inV" type="number" value="12" step="any"></div>
+          <div><label>Unidad</label><select id="uV"><option value="1" selected>V</option><option value="1e3">kV</option><option value="1e-3">mV</option></select></div>
+        </div>
+        <div class="row" id="gQ">
+          <div><label>Carga Q</label><input id="inQ" type="number" value="1200" step="any"></div>
+          <div><label>Unidad</label><select id="uQ"><option value="1e-12">pC</option><option value="1e-9">nC</option><option value="1e-6" selected>μC</option><option value="1e-3">mC</option><option value="1">C</option></select></div>
+        </div>
+        <div class="res" id="out2"></div>
+        <p class="note">U = ½·C·V² = ½·Q·V = Q² / (2C)</p>
+      </div>
+      <div>
+        <canvas id="cv3" width="640" height="300"></canvas>
+        <p class="note">La energía crece con el <b>cuadrado</b> del voltaje: al duplicar V, la energía se cuadruplica.</p>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+const E0 = 8.8541878128e-12;
+const $ = id => document.getElementById(id);
+const DIEL = {
+  vacio:['Vacío',1], aire:['Aire',1.00059], teflon:['Teflón',2.1], papel:['Papel',3.7],
+  mica:['Mica',5.4], vidrio:['Vidrio',7], agua:['Agua (20 °C)',80.2], custom:['Personalizado…',null]
+};
+const PREF = [[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'μ'],[1e-9,'n'],[1e-12,'p']];
+
+/* Formato con prefijos SI */
+function eng(v, u){
+  if(!isFinite(v)) return '∞ '+u;
+  if(v===0) return '0 '+u;
+  for(const [s,p] of PREF) if(Math.abs(v)>=s) return parseFloat((v/s).toPrecision(4))+' '+p+u;
+  return v.toExponential(2)+' '+u;
+}
+
+/* ---------- Gráfica genérica ---------- */
+function plot(cv, o){
+  const c=cv.getContext('2d'), W=cv.width, H=cv.height, L=78, R=16, T=16, B=40;
+  c.clearRect(0,0,W,H); c.fillStyle='#fff'; c.fillRect(0,0,W,H);
+  const N=200, xs=[], ys=[];
+  for(let i=0;i<=N;i++){ const x=o.xmin+(o.xmax-o.xmin)*i/N; xs.push(x); ys.push(o.f(x)); }
+  let lo=Math.min(...ys,o.yc), hi=Math.max(...ys,o.yc);
+  if(o.log){ lo=Math.pow(10,Math.floor(Math.log10(lo))); hi=Math.pow(10,Math.ceil(Math.log10(hi))); if(hi<=lo) hi=lo*10; }
+  else lo=0;
+  const ty=v=>o.log? H-B-(Math.log10(v)-Math.log10(lo))/(Math.log10(hi)-Math.log10(lo))*(H-B-T)
+                   : H-B-(v-lo)/(hi-lo)*(H-B-T);
+  const tx=x=>L+(x-o.xmin)/(o.xmax-o.xmin)*(W-L-R);
+  c.font='11px sans-serif'; c.lineWidth=1;
+  const ticks=[];
+  if(o.log){ for(let p=Math.log10(lo); p<=Math.log10(hi)+1e-9; p++) ticks.push(Math.pow(10,p)); }
+  else for(let i=0;i<=4;i++) ticks.push(lo+(hi-lo)*i/4);
+  c.textAlign='right'; c.fillStyle='#55607a'; c.strokeStyle='#e3e7ef';
+  ticks.forEach(v=>{ const y=ty(v); c.beginPath(); c.moveTo(L,y); c.lineTo(W-R,y); c.stroke(); c.fillText(eng(v,o.yu),L-6,y+4); });
+  c.textAlign='center';
+  for(let i=0;i<=5;i++){ const x=o.xmin+(o.xmax-o.xmin)*i/5; c.fillText(parseFloat(x.toPrecision(3)),tx(x),H-B+16); }
+  c.fillText(o.xl,(L+W-R)/2,H-6);
+  c.save(); c.translate(12,(T+H-B)/2); c.rotate(-Math.PI/2); c.fillText(o.yl,0,0); c.restore();
+  c.strokeStyle='#8a93a6'; c.strokeRect(L,T,W-L-R,H-T-B);
+  c.strokeStyle='#2f5bea'; c.lineWidth=2.5; c.beginPath();
+  xs.forEach((x,i)=>i?c.lineTo(tx(x),ty(ys[i])):c.moveTo(tx(x),ty(ys[i]))); c.stroke();
+  c.setLineDash([4,4]); c.strokeStyle='#d64541'; c.lineWidth=1;
+  c.beginPath(); c.moveTo(tx(o.xc),H-B); c.lineTo(tx(o.xc),ty(o.yc)); c.lineTo(L,ty(o.yc)); c.stroke(); c.setLineDash([]);
+  c.fillStyle='#d64541'; c.beginPath(); c.arc(tx(o.xc),ty(o.yc),6,0,7); c.fill();
+}
+
+/* ---------- Módulo 1: simulador ---------- */
+function initDiel(){
+  $('diel').innerHTML=Object.entries(DIEL).map(([k,v])=>`<option value="${k}">${v[0]}${v[1]?'  (κ = '+v[1]+')':''}</option>`).join('');
+  $('diel').value='aire';
+}
+function kappa(){
+  const s=$('diel').value; $('kcBox').style.display=s==='custom'?'block':'none';
+  return s==='custom'? Math.max(1,+$('kc').value||1) : DIEL[s][1];
+}
+
+function drawCap(Acm,dmm,k,Q,V,E){
+  const c=$('cv1').getContext('2d'), W=640, H=360;
+  c.clearRect(0,0,W,H); c.fillStyle='#fff'; c.fillRect(0,0,W,H);
+  const pw=140+300*Math.sqrt((Acm-10)/490), gap=14+dmm*13, cx=W/2, th=10;
+  const yT=(H-(gap+2*th))/2, yD=yT+th, yB=yD+gap, x0=cx-pw/2;
+  // dieléctrico
+  const a=0.08+0.30*Math.min(1,Math.log10(k)/1.9);
+  c.fillStyle=k>1.001?`rgba(47,91,234,${a})`:'#f6f8fc'; c.fillRect(x0,yD,pw,gap);
+  if(k>1.001){ c.fillStyle='#1f3a9a'; c.font='12px sans-serif'; c.textAlign='center'; c.fillText('κ = '+parseFloat(k.toPrecision(4)),cx,yD+gap/2+4); }
+  // placas
+  c.fillStyle='#d64541'; c.fillRect(x0,yT,pw,th);
+  c.fillStyle='#2f5bea'; c.fillRect(x0,yB,pw,th);
+  // cargas
+  const f=Math.min(1,Math.max(0,(Math.log10(Q)+11.5)/7)), n=3+Math.round(f*13);
+  c.font='bold 13px sans-serif'; c.textAlign='center';
+  for(let i=0;i<n;i++){
+    const x=x0+pw*(i+.5)/n;
+    c.fillStyle='#d64541'; c.fillText('+',x,yD+13);
+    c.fillStyle='#2f5bea'; c.fillText('−',x,yB-4);
+  }
+  // líneas de campo
+  if(gap>40){
+    c.strokeStyle='#2c3e50'; c.fillStyle='#2c3e50'; c.lineWidth=1.3;
+    for(let i=0;i<8;i++){
+      const x=x0+pw*(i+.5)/8, y1=yD+18, y2=yB-18;
+      c.beginPath(); c.moveTo(x,y1); c.lineTo(x,y2); c.stroke();
+      c.beginPath(); c.moveTo(x,y2+4); c.lineTo(x-4,y2-4); c.lineTo(x+4,y2-4); c.fill();
+    }
+  }
+  // cotas
+  c.strokeStyle='#555'; c.fillStyle='#333'; c.lineWidth=1.2; c.font='12px sans-serif';
+  const xd=x0-26; c.beginPath(); c.moveTo(xd,yD); c.lineTo(xd,yB); c.stroke();
+  [yD,yB].forEach(y=>{c.beginPath();c.moveTo(xd-5,y);c.lineTo(xd+5,y);c.stroke();});
+  c.textAlign='right'; c.fillText('d = '+eng(dmm*1e-3,'m'),xd-8,(yD+yB)/2+4);
+  c.textAlign='center'; c.fillText('Área A = '+Acm+' cm²',cx,yB+th+22);
+  c.textAlign='left'; c.fillStyle='#d64541'; c.fillText('+Q  = '+eng(Q,'C'),x0+pw+12,yT+10);
+  c.fillStyle='#2f5bea'; c.fillText('−Q',x0+pw+12,yB+10);
+  c.fillStyle='#2c3e50'; c.fillText('E = '+eng(E,'V/m'),x0+pw+12,(yD+yB)/2+4);
+}
+
+function sim(){
+  const Acm=+$('A').value, dmm=+$('d').value, V=+$('V').value, k=kappa();
+  $('vA').textContent=Acm+' cm²'; $('vd').textContent=dmm+' mm'; $('vV').textContent=V+' V';
+  const A=Acm*1e-4, d=dmm*1e-3, C=k*E0*A/d, C0=E0*A/d, Q=C*V, E=V/d, U=.5*C*V*V;
+  $('out1').textContent=
+    `Capacitancia  C = ${eng(C,'F')}\n`+
+    `Sin dieléctrico C₀ = ${eng(C0,'F')}\n`+
+    `Factor C/C₀  = ${parseFloat(k.toPrecision(4))}\n`+
+    `Carga         Q = ${eng(Q,'C')}\n`+
+    `Campo         E = ${eng(E,'V/m')}\n`+
+    `Energía       U = ${eng(U,'J')}`;
+  $('warn').textContent=($('diel').value==='aire'&&E>3e6)
+    ? '⚠ E supera ≈3×10⁶ V/m: el aire se ioniza y salta una chispa (ruptura dieléctrica).':'';
+  drawCap(Acm,dmm,k,Q,V,E);
+  if($('xvar').value==='d')
+    plot($('cv2'),{xmin:0.1,xmax:10,f:x=>k*E0*A/(x*1e-3),xc:dmm,yc:C,xl:'Distancia d (mm)',yl:'Capacitancia C',yu:'F',log:true});
+  else
+    plot($('cv2'),{xmin:10,xmax:500,f:x=>k*E0*(x*1e-4)/d,xc:Acm,yc:C,xl:'Área A (cm²)',yl:'Capacitancia C',yu:'F',log:true});
+}
+
+/* ---------- Módulo 2: energía ---------- */
+function energia(){
+  const m=$('mode').value;
+  $('gC').style.display=m==='QV'?'none':'grid';
+  $('gV').style.display=m==='QC'?'none':'grid';
+  $('gQ').style.display=m==='CV'?'none':'grid';
+  let C=+$('inC').value*+$('uC').value, V=+$('inV').value*+$('uV').value, Q=+$('inQ').value*+$('uQ').value;
+  const need = m==='CV'?[C,V]: m==='QC'?[Q,C]:[Q,V];
+  if(need.some(v=>!(v>0))){ $('out2').textContent='Ingresa valores positivos.'; plot($('cv3'),{xmin:0,xmax:1,f:x=>0,xc:0,yc:0,xl:'',yl:'',yu:'J'}); return; }
+  if(m==='CV') Q=C*V; else if(m==='QC') V=Q/C; else C=Q/V;
+  const U=.5*C*V*V, h=U/9.81, t=U/5;
+  $('out2').textContent=
+    `Capacitancia  C = ${eng(C,'F')}\n`+
+    `Voltaje       V = ${eng(V,'V')}\n`+
+    `Carga         Q = ${eng(Q,'C')}\n`+
+    `────────────────────────\n`+
+    `Energía       U = ${eng(U,'J')}\n\n`+
+    `Equivale a levantar 1 kg una altura de ${eng(h,'m')}\n`+
+    `o a encender un LED de 5 W durante ${eng(t,'s')}.`;
+  plot($('cv3'),{xmin:0,xmax:2*V,f:x=>.5*C*x*x,xc:V,yc:U,xl:'Voltaje V (V)',yl:'Energía U',yu:'J',log:false});
+}
+
+/* ---------- Pestañas y eventos ---------- */
+function tab(i,btn){
+  document.querySelectorAll('.panel').forEach((p,k)=>p.classList.toggle('on',k===i));
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on')); btn.classList.add('on');
+  i===0?sim():energia();
+}
+['A','d','V','diel','kc','xvar'].forEach(id=>$(id).addEventListener('input',sim));
+['mode','inC','uC','inV','uV','inQ','uQ'].forEach(id=>$(id).addEventListener('input',energia));
+initDiel(); sim(); energia();
+</script>
+</body>
+</html>
